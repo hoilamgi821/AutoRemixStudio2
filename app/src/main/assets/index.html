@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AutoRemix Studio v2</title>
+<title>AutoRemix AI Studio</title>
 <style>
   :root {
     --bg: #0a0a12;
@@ -14,45 +14,37 @@
     --pink: #ec4899;
     --green: #10b981;
     --red: #ef4444;
-    --amber: #f59e0b;
     --text: #f3f4f6;
     --muted: #9ca3af;
-    --border: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.09);
   }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
-    margin: 0; padding: 12px 12px 40px;
+    margin: 0; padding: 12px 12px 44px;
     background: var(--bg); color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 14px; line-height: 1.4;
   }
-  .header {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 8px; margin-bottom: 12px;
-  }
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .brand { display: flex; align-items: center; gap: 8px; }
   .logo {
     width: 36px; height: 36px; border-radius: 10px;
     background: linear-gradient(135deg, var(--accent), var(--cyan));
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 14px; color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff;
   }
   .brand h1 { margin: 0; font-size: 16px; }
   .brand small { color: var(--cyan); font-size: 11px; display: block; }
-  .btn {
-    border: none; border-radius: 10px; padding: 9px 10px;
-    font-weight: 600; font-size: 12px; color: #fff; cursor: pointer;
-    background: var(--card2); border: 1px solid var(--border);
-    transition: transform 0.1s;
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+  .tab {
+    flex: 1; padding: 10px; border-radius: 11px; text-align: center;
+    font-weight: 700; font-size: 13px; cursor: pointer;
+    background: var(--card); border: 1px solid var(--border); color: var(--muted);
   }
-  .btn:active { transform: scale(0.96); }
-  .btn-primary { background: linear-gradient(135deg, var(--accent), #5b21b6); border: none; }
-  .btn-cyan { background: linear-gradient(135deg, #0891b2, var(--cyan)); color: #04131a; border: none; }
-  .btn-pink { background: linear-gradient(135deg, #be185d, var(--pink)); border: none; }
-  .btn-danger { background: rgba(239,68,68,0.18); border: 1px solid rgba(239,68,68,0.45); color: #fca5a5; }
-  .btn-rec { background: var(--red); border: none; padding: 9px 12px; }
-  .btn-rec.recording { animation: pulse 1s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .tab.active {
+    background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(34,211,238,0.2));
+    border-color: var(--cyan); color: #fff;
+  }
 
   .card {
     background: var(--card); border: 1px solid var(--border);
@@ -61,93 +53,86 @@
   .card-title {
     font-size: 12px; text-transform: uppercase; letter-spacing: 0.7px;
     color: var(--cyan); font-weight: 700; margin: 0 0 10px;
-    display: flex; justify-content: space-between; align-items: center; gap: 6px;
+    display: flex; justify-content: space-between; align-items: center;
   }
-  canvas#viz {
-    width: 100%; height: 64px; border-radius: 10px;
-    background: #07070d; display: block; border: 1px solid var(--border);
-  }
-  .status-bar {
-    font-size: 12px; color: var(--green); text-align: center;
-    margin-top: 6px; min-height: 18px;
-  }
-  .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .mode-btn {
+  .btn {
+    border: none; border-radius: 10px; padding: 10px 12px;
+    font-weight: 700; font-size: 12px; color: #fff; cursor: pointer;
     background: var(--card2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 9px 6px; color: var(--text);
-    font-size: 12px; font-weight: 600; text-align: center; cursor: pointer;
   }
-  .mode-btn span { display: block; font-size: 10px; color: var(--muted); font-weight: 400; margin-top: 2px; }
-  .mode-btn.active {
-    background: linear-gradient(135deg, rgba(124,58,237,0.38), rgba(34,211,238,0.22));
-    border-color: var(--cyan); color: #fff;
-  }
-  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.5; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #5b21b6); border: none; }
+  .btn-pink { background: linear-gradient(135deg, #be185d, var(--pink)); border: none; }
+  .btn-cyan { background: linear-gradient(135deg, #0891b2, var(--cyan)); color: #04131a; border: none; }
+  .btn-green { background: linear-gradient(135deg, #059669, var(--green)); color: #041a12; border: none; }
+  .btn-danger { background: rgba(239,68,68,0.18); border: 1px solid rgba(239,68,68,0.45); color: #fca5a5; }
+  .row { display: flex; gap: 6px; align-items: center; }
   .row > .btn { flex: 1; text-align: center; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .slider-group { margin-top: 8px; }
-  .slider-label {
-    display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 3px;
-  }
-  .slider-label b { color: var(--text); }
-  input[type=range] { width: 100%; accent-color: var(--cyan); height: 22px; margin: 0; }
 
-  .list-box {
-    max-height: 220px; overflow-y: auto; margin-top: 8px;
-    border-top: 1px solid var(--border); padding-top: 6px;
+  input[type=text] {
+    width: 100%; padding: 10px; border-radius: 10px;
+    background: #0b0c18; border: 1px solid var(--border);
+    color: #fff; font-size: 13px; outline: none;
   }
-  .track-item {
-    display: flex; align-items: center; justify-content: space-between; gap: 6px;
-    padding: 8px; border-radius: 9px; margin-bottom: 5px;
-    background: rgba(255,255,255,0.04); border: 1px solid transparent;
-  }
-  .track-item.active { background: rgba(34,211,238,0.14); border-color: rgba(34,211,238,0.45); }
-  .track-info { flex: 1; min-width: 0; cursor: pointer; }
-  .track-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .track-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
-  .mini-btn {
-    border: none; border-radius: 6px; padding: 5px 7px; font-size: 11px;
-    font-weight: 700; cursor: pointer; background: var(--card2); color: var(--text);
-    border: 1px solid var(--border);
-  }
-  .mini-btn.del { background: rgba(239,68,68,0.22); color: #fca5a5; border-color: rgba(239,68,68,0.35); }
-  .mini-btn.play { background: rgba(34,211,238,0.2); color: var(--cyan); border-color: rgba(34,211,238,0.4); }
+  input[type=text]:focus { border-color: var(--cyan); }
+  .hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
 
-  .seg-item {
-    padding: 8px; border-radius: 9px; margin-bottom: 6px;
+  .file-item {
     background: var(--card2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 9px; margin-bottom: 7px;
   }
-  .seg-item.playing { border-color: var(--pink); background: rgba(236,72,153,0.14); }
-  .seg-item.drop-seg { border-color: rgba(245,158,11,0.45); background: rgba(245,158,11,0.1); }
-  .seg-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 6px; }
-  .seg-title { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
-  .seg-time { font-size: 11px; color: var(--cyan); font-weight: 600; flex-shrink: 0; }
-  .seg-actions { display: flex; gap: 5px; }
-  .seg-actions .mini-btn { flex: 1; text-align: center; padding: 5px 4px; }
+  .file-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 7px; }
+  .file-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+  .file-controls { display: flex; gap: 6px; }
+  .pill-btn {
+    flex: 1; padding: 6px; border-radius: 8px; font-size: 11px; font-weight: 700;
+    text-align: center; cursor: pointer; background: #101222;
+    border: 1px solid var(--border); color: var(--muted);
+  }
+  .pill-btn.beat-on { background: rgba(236,72,153,0.22); border-color: var(--pink); color: #fbcfe8; }
+  .pill-btn.voc-on { background: rgba(34,211,238,0.18); border-color: var(--cyan); color: #cffafe; }
+  .del-btn {
+    border: none; border-radius: 7px; padding: 4px 8px; font-weight: 800;
+    background: rgba(239,68,68,0.22); color: #fca5a5; cursor: pointer;
+  }
 
   .chip-row { display: flex; gap: 6px; margin-bottom: 8px; }
   .chip {
-    flex: 1; text-align: center; padding: 7px 4px; border-radius: 8px;
+    flex: 1; text-align: center; padding: 8px 4px; border-radius: 8px;
     font-size: 11px; font-weight: 700; background: var(--card2);
     border: 1px solid var(--border); color: var(--muted); cursor: pointer;
   }
   .chip.active { border-color: var(--cyan); color: #fff; background: rgba(34,211,238,0.18); }
 
-  .toggle-row { display: flex; gap: 6px; margin: 8px 0; }
   .toggle-pill {
-    flex: 1; padding: 7px 6px; border-radius: 8px; font-size: 11px; font-weight: 700;
+    flex: 1; padding: 8px 6px; border-radius: 8px; font-size: 11px; font-weight: 700;
     text-align: center; cursor: pointer; background: var(--card2);
     border: 1px solid var(--border); color: var(--muted);
   }
   .toggle-pill.on { background: rgba(16,185,129,0.2); border-color: var(--green); color: #6ee7b7; }
 
-  .fx-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .fx-pad {
-    padding: 12px 8px; border-radius: 12px; border: 1px solid var(--border);
-    font-weight: 700; font-size: 13px; color: #fff; cursor: pointer;
-    background: linear-gradient(135deg, #1f223d, #15172b);
+  .slider-group { margin-top: 8px; }
+  .slider-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+  .slider-label b { color: var(--text); }
+  input[type=range] { width: 100%; accent-color: var(--cyan); height: 22px; margin: 0; }
+
+  .prog-wrap {
+    width: 100%; height: 10px; background: #090a14; border-radius: 99px;
+    overflow: hidden; border: 1px solid var(--border); margin: 10px 0 6px;
   }
-  .fx-pad:active { transform: scale(0.95); border-color: var(--pink); background: #2d1b3d; }
+  .prog-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--cyan), var(--pink));
+    transition: width 0.35s ease;
+  }
+  .status-box { font-size: 12px; color: var(--green); text-align: center; min-height: 18px; }
+  .summary-box {
+    background: #0c0d1a; border: 1px solid var(--border); border-radius: 10px;
+    padding: 9px; font-size: 11px; color: #d1d5db; margin: 8px 0;
+  }
+  audio { width: 100%; margin: 8px 0; border-radius: 10px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .hidden { display: none; }
 </style>
 </head>
@@ -155,1299 +140,398 @@
 
 <div class="header">
   <div class="brand">
-    <div class="logo">AR2</div>
+    <div class="logo">AI</div>
     <div>
-      <h1>AutoRemix Studio</h1>
-      <small id="modeLabel">Chế độ: Gốc</small>
-    </div>
-  </div>
-  <button id="recBtn" class="btn btn-rec">● Ghi âm</button>
-</div>
-
-<div class="card">
-  <canvas id="viz" width="600" height="110"></canvas>
-  <div class="status-bar" id="statusText">Bấm "➕ Thêm nhạc" để nạp 1 hoặc nhiều bài từ máy</div>
-</div>
-
-<!-- 1-TAP MODES -->
-<div class="card">
-  <div class="card-title">1 Chạm Tự Chế Nhạc</div>
-  <div class="modes">
-    <div class="mode-btn active" data-mode="original">Gốc<span>Mặc định</span></div>
-    <div class="mode-btn" data-mode="chill">Chill / Lo-fi<span>Chậm + Mưa</span></div>
-    <div class="mode-btn" data-mode="vinahouse">Vinahouse<span>Giữ tông+Nhún</span></div>
-    <div class="mode-btn" data-mode="nightcore">Nightcore<span>Nhanh 1.25x</span></div>
-    <div class="mode-btn" data-mode="mashup">Mashup 4in1<span>Tự đảo câu</span></div>
-    <div class="mode-btn" data-mode="nonstop">Nonstop<span>Nối hết bài</span></div>
-  </div>
-</div>
-
-<!-- KHO NHẠC CỦA BẠN -->
-<div class="card">
-  <div class="card-title">
-    <span>1. Kho Nhạc Của Bạn (<span id="trackCount">0</span> bài)</span>
-    <button class="btn btn-danger" style="padding:4px 9px;font-size:11px" id="clearAllTracksBtn">🗑 Xoá sạch</button>
-  </div>
-  <div class="row">
-    <button class="btn btn-primary" id="addTracksBtn">➕ Thêm 1 hoặc nhiều bài</button>
-    <button class="btn btn-cyan" id="stopAllBtn">⏹ Dừng hết</button>
-  </div>
-  <input type="file" id="fileTracks" accept="audio/*" multiple class="hidden">
-
-  <div class="list-box" id="trackList">
-    <div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">
-      Chưa có bài nào. Tải 2–4 bài vào để ghép Mashup Lộn Xộn hoặc 1 bài để Remix!
-    </div>
-  </div>
-
-  <!-- Thanh tua khi nghe bài đơn -->
-  <div id="singleBar" class="slider-group hidden">
-    <div class="slider-label"><span id="singleName">Đang phát</span><b id="singleTime">00:00 / 00:00</b></div>
-    <input type="range" id="singleSeek" min="0" max="100" value="0">
-  </div>
-</div>
-
-<!-- AUTO MASHUP LỘN XỘN -->
-<div class="card">
-  <div class="card-title">
-    <span>2. Tự Ghép Mashup Lộn Xộn (2in1 / 3in1 / 4in1)</span>
-    <span id="mashupState" style="color:var(--muted);font-size:11px">Chưa tạo</span>
-  </div>
-
-  <div class="chip-row" id="phraseChips">
-    <div class="chip" data-beats="8">8 nhịp (~3.5s)</div>
-    <div class="chip active" data-beats="16">16 nhịp (~7s)</div>
-    <div class="chip" data-beats="32">32 nhịp (~14s)</div>
-  </div>
-
-  <div class="toggle-row">
-    <div class="toggle-pill on" id="togglePitch">Giữ tông giọng: BẬT</div>
-    <div class="toggle-pill on" id="toggleDrop">Chèn Drop giữa: BẬT</div>
-  </div>
-
-  <div class="slider-group">
-    <div class="slider-label"><span>Nhịp BPM chung của bản Mashup</span><b id="targetBpmVal">136 BPM</b></div>
-    <input type="range" id="targetBpm" min="85" max="155" value="136">
-  </div>
-
-  <div class="row" style="margin-top:10px">
-    <button class="btn btn-pink" id="genMashupBtn">⚡ Tự Ghép Mashup</button>
-    <button class="btn btn-cyan" id="playMashupBtn">▶ Phát Mashup</button>
-    <button class="btn" id="startNonstopBtn">🔁 Nonstop</button>
-  </div>
-
-  <div class="list-box" id="timelineBox" style="max-height:260px">
-    <div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">
-      Thêm ít nhất 2 bài ở trên rồi bấm "⚡ Tự Ghép Mashup" để app tự cắt nối đan xen.
+      <h1>AutoRemix AI Studio</h1>
+      <small>Tự tách lời Demucs + Ghép 1 Beat chung</small>
     </div>
   </div>
 </div>
 
-<!-- AUTO BEAT MAKER -->
-<div class="card">
-  <div class="card-title">
-    <span>3. Máy Đánh Trống & Nhún Sidechain</span>
-    <button class="btn" id="drumToggleBtn" style="padding:4px 10px;font-size:11px">Trống: TẮT</button>
-  </div>
-  <div class="row" style="margin-bottom:8px">
-    <button class="btn drum-style" data-style="vinahouse">Vinahouse</button>
-    <button class="btn drum-style" data-style="edm">EDM</button>
-    <button class="btn drum-style" data-style="lofi">Lo-fi</button>
-    <button class="btn drum-style" data-style="trap">Trap 808</button>
-  </div>
-  <div class="toggle-row">
-    <div class="toggle-pill on" id="toggleSidechain">Nhún nhịp Sidechain: BẬT</div>
-    <div class="toggle-pill" id="toggleBassCut">Lọc Bass cũ (Chống ù): TẮT</div>
-  </div>
-  <div class="grid-2">
-    <div class="slider-group">
-      <div class="slider-label"><span>Nhịp trống BPM</span><b id="bpmVal">136</b></div>
-      <input type="range" id="bpm" min="75" max="165" value="136">
+<div class="tabs">
+  <div class="tab active" data-tab="aiTab">🤖 AI Tách & Ghép</div>
+  <div class="tab" data-tab="offlineTab">🎛 Remix Offline</div>
+</div>
+
+<!-- ==================== TAB 1: AI SERVER ==================== -->
+<div id="aiTab">
+  <div class="card">
+    <div class="card-title">
+      <span>1. Kết nối Server AI (Google Colab)</span>
+      <span id="connBadge" style="color:var(--muted);font-size:11px">Chưa kiểm tra</span>
     </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>Âm lượng trống</span><b id="drumVolVal">60%</b></div>
-      <input type="range" id="drumVol" min="0" max="100" value="60">
+    <div class="row">
+      <input type="text" id="serverUrl" placeholder="Dán link https://xxxx.trycloudflare.com">
+      <button class="btn btn-cyan" id="testConnBtn" style="flex:0 0 auto">Kiểm tra</button>
     </div>
+    <div class="hint">Chạy sổ tay Colab rồi copy link trycloudflare.com dán vào đây (tự lưu lại).</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>2. Chọn nhạc để tách & ghép (<span id="aiCount">0</span> bài)</span>
+      <button class="btn btn-danger" id="clearAiFiles" style="padding:4px 8px;font-size:11px">🗑 Xoá sạch</button>
+    </div>
+    <div class="row" style="margin-bottom:8px">
+      <button class="btn btn-primary" id="addAiFilesBtn">➕ Thêm nhạc MP3 / WAV</button>
+    </div>
+    <input type="file" id="aiFileInput" accept="audio/*" multiple class="hidden">
+
+    <div id="aiFileList">
+      <div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">
+        • <b>Mashup nhiều bài:</b> Nạp 2–4 bài, chọn 1 bài làm <b>Beat nền</b>, tích <b>Lấy lời</b> cả 2–4 bài.<br>
+        • <b>Remix 1 bài:</b> Nạp bài gốc (chỉ tích <b>Lấy lời</b>) + 1 file Beat Vinahouse (chỉ chọn <b>Beat nền</b>).
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">3. Cấu hình tự ghép</div>
+    <div class="chip-row" id="aiPhraseChips">
+      <div class="chip" data-beats="8">8 nhịp (~3.5s)</div>
+      <div class="chip active" data-beats="16">16 nhịp (~7s)</div>
+      <div class="chip" data-beats="32">32 nhịp (~14s)</div>
+    </div>
+
+    <div class="row" style="margin-bottom:8px">
+      <div class="toggle-pill on" id="aiAutoKey">Tự khớp tông: BẬT</div>
+      <div class="toggle-pill on" id="aiDrop">Chèn Drop giữa: BẬT</div>
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-label">
+        <span>Tốc độ BPM đích</span>
+        <b id="aiBpmVal">Tự theo Beat nền</b>
+      </div>
+      <input type="range" id="aiBpm" min="0" max="155" value="0">
+      <div class="hint">Để 0 để giữ nguyên nhịp chuẩn của Beat nền (nghe sạch nhất), hoặc kéo từ 128–142 BPM.</div>
+    </div>
+
+    <button class="btn btn-pink" id="runAiBtn" style="width:100%;margin-top:12px;padding:13px;font-size:14px">
+      🚀 AI Tách Lời & Tự Ghép Ngay
+    </button>
+
+    <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
+    <div class="status-box" id="aiStatus">Sẵn sàng xử lý</div>
+  </div>
+
+  <div class="card hidden" id="resultCard">
+    <div class="card-title">🎉 Bản Nhạc AI Đã Hoàn Thành</div>
+    <div class="summary-box" id="resultSummary"></div>
+    <audio id="resultAudio" controls></audio>
+    <button class="btn btn-green" id="saveMp3Btn" style="width:100%;padding:12px;font-size:13px">
+      ⬇ Lưu File MP3 Về Máy (Downloads/AutoRemix)
+    </button>
   </div>
 </div>
 
-<!-- MIXER & EQ -->
-<div class="card">
-  <div class="card-title">4. Mixer, EQ & Hiệu Ứng</div>
-  <div class="grid-2">
-    <div class="slider-group">
-      <div class="slider-label"><span>Tốc độ (Bài lẻ)</span><b id="speedVal">1.00x</b></div>
-      <input type="range" id="speed" min="0.7" max="1.45" step="0.01" value="1.00">
+<!-- ==================== TAB 2: OFFLINE MIXER ==================== -->
+<div id="offlineTab" class="hidden">
+  <div class="card">
+    <div class="card-title">Chỉnh Nhanh 1 Bài Offline (Không cần mạng)</div>
+    <div class="row" style="margin-bottom:8px">
+      <button class="btn btn-primary" id="offLoadBtn">📂 Chọn 1 bài nhạc</button>
+      <button class="btn btn-cyan" id="offPlayBtn">▶ Phát / Dừng</button>
     </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>Bass (Trầm)</span><b id="bassVal">0 dB</b></div>
-      <input type="range" id="bass" min="-12" max="14" value="0">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>Mid (Giọng hát)</span><b id="midVal">0 dB</b></div>
-      <input type="range" id="mid" min="-12" max="12" value="0">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>Treble (Sáng)</span><b id="trebleVal">0 dB</b></div>
-      <input type="range" id="treble" min="-12" max="12" value="0">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>Vang (Reverb)</span><b id="reverbVal">0%</b></div>
-      <input type="range" id="reverb" min="0" max="100" value="0">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>Nhại (Echo)</span><b id="echoVal">0%</b></div>
-      <input type="range" id="echo" min="0" max="80" value="0">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>Lọc ấm Lo-fi</span><b id="filterVal">20000 Hz</b></div>
-      <input type="range" id="filter" min="800" max="20000" step="100" value="20000">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>Tiếng mưa / đĩa</span><b id="rainVal">0%</b></div>
-      <input type="range" id="rain" min="0" max="100" value="0">
-    </div>
-  </div>
-</div>
+    <input type="file" id="offFile" accept="audio/*" class="hidden">
+    <div id="offName" style="font-size:12px;color:var(--cyan);text-align:center;margin-bottom:8px">Chưa chọn bài</div>
 
-<!-- DJ FX PADS -->
-<div class="card">
-  <div class="card-title">5. Bàn Hiệu Ứng DJ (Bấm Thả)</div>
-  <div class="fx-grid">
-    <button class="fx-pad" data-fx="drop">💥 Bass Drop</button>
-    <button class="fx-pad" data-fx="riser">🚀 Riser Sweep</button>
-    <button class="fx-pad" data-fx="horn">📢 Airhorn DJ</button>
-    <button class="fx-pad" data-fx="stutter">⚡ Lặp Giật Giọng</button>
+    <div class="chip-row">
+      <div class="chip active off-preset" data-p="orig">Gốc</div>
+      <div class="chip off-preset" data-p="chill">Chill Lo-fi</div>
+      <div class="chip off-preset" data-p="vina">Vinahouse</div>
+      <div class="chip off-preset" data-p="night">Nightcore</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="slider-group">
+        <div class="slider-label"><span>Tốc độ</span><b id="offSpeedVal">1.00x</b></div>
+        <input type="range" id="offSpeed" min="0.7" max="1.4" step="0.01" value="1.00">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>Bass</span><b id="offBassVal">0 dB</b></div>
+        <input type="range" id="offBass" min="-10" max="14" value="0">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>Treble</span><b id="offTrebVal">0 dB</b></div>
+        <input type="range" id="offTreb" min="-10" max="12" value="0">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>Lọc ấm</span><b id="offFiltVal">20000 Hz</b></div>
+        <input type="range" id="offFilt" min="1000" max="20000" step="200" value="20000">
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
 (() => {
-  let ctx = null;
-  let musicBus, bassCutFilter, sidechainGain, eqLow, eqMid, eqHigh, lofiFilter;
-  let dryGain, reverbNode, reverbGain, delayNode, delayFeedback, delayGain;
-  let mixBus, limiter, analyser, drumGain, fxGain, rainGain, rainSource;
-
-  let nextTrackId = 1;
-  const state = {
-    mode: 'original',
-    tracks: [], // { id, name, url, audio, srcNode, gainNode, duration, bpm, firstBeat, hotspots[] }
-    playMode: 'idle', // 'idle' | 'single' | 'mashup' | 'nonstop'
-    activeTrackId: null,
-
-    // Mashup
-    phraseBeats: 16,
-    targetBpm: 136,
-    keepPitch: true,
-    insertDrop: true,
-    sidechainOn: true,
-    bassCutOn: false,
-    mashupSeq: [], // { type:'track'|'drop', trackId, startSec, durBeats, label }
-    mashupIdx: 0,
-    segEndTime: 0,
-    cuedNext: false,
-    mashupTimer: null,
-
-    // Nonstop
-    nonstopIdx: 0,
-    nonstopFading: false,
-    nonstopTimer: null,
-
-    // Drums
-    speed: 1.0,
-    drumOn: false,
-    drumStyle: 'vinahouse',
-    bpm: 136,
-    drumStep: 0,
-    drumTimer: null,
-    inDropSynth: false,
-
-    // Recorder
-    isRecording: false,
-    recLeft: [],
-    recRight: [],
-    recNode: null
-  };
-
   const $ = id => document.getElementById(id);
-  const setStatus = msg => { $('statusText').textContent = msg; };
   const esc = s => String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
-  function fmt(sec) {
-    if (!isFinite(sec) || sec < 0) return '00:00';
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-  }
-
-  function ensureAudio() {
-    if (ctx) {
-      if (ctx.state === 'suspended') ctx.resume();
-      return;
-    }
-    const AC = window.AudioContext || window.webkitAudioContext;
-    ctx = new AC();
-
-    musicBus = ctx.createGain();
-    bassCutFilter = ctx.createBiquadFilter();
-    bassCutFilter.type = 'highpass';
-    bassCutFilter.frequency.value = 20;
-
-    sidechainGain = ctx.createGain();
-    sidechainGain.gain.value = 1.0;
-
-    eqLow = ctx.createBiquadFilter(); eqLow.type = 'lowshelf'; eqLow.frequency.value = 110;
-    eqMid = ctx.createBiquadFilter(); eqMid.type = 'peaking'; eqMid.frequency.value = 1200;
-    eqHigh = ctx.createBiquadFilter(); eqHigh.type = 'highshelf'; eqHigh.frequency.value = 7000;
-    lofiFilter = ctx.createBiquadFilter(); lofiFilter.type = 'lowpass'; lofiFilter.frequency.value = 20000;
-
-    dryGain = ctx.createGain();
-    reverbNode = ctx.createConvolver();
-    reverbNode.buffer = createImpulse(2.2, 2.5);
-    reverbGain = ctx.createGain(); reverbGain.gain.value = 0;
-
-    delayNode = ctx.createDelay(1.5); delayNode.delayTime.value = 0.34;
-    delayFeedback = ctx.createGain(); delayFeedback.gain.value = 0.36;
-    delayGain = ctx.createGain(); delayGain.gain.value = 0;
-    delayNode.connect(delayFeedback);
-    delayFeedback.connect(delayNode);
-
-    drumGain = ctx.createGain(); drumGain.gain.value = 0.6;
-    fxGain = ctx.createGain(); fxGain.gain.value = 0.85;
-
-    mixBus = ctx.createGain();
-    limiter = ctx.createDynamicsCompressor();
-    limiter.threshold.value = -3;
-    limiter.knee.value = 8;
-    limiter.ratio.value = 12;
-    limiter.attack.value = 0.003;
-    limiter.release.value = 0.14;
-
-    analyser = ctx.createAnalyser();
-    analyser.fftSize = 128;
-
-    musicBus.connect(bassCutFilter);
-    bassCutFilter.connect(sidechainGain);
-    sidechainGain.connect(eqLow);
-    eqLow.connect(eqMid);
-    eqMid.connect(eqHigh);
-    eqHigh.connect(lofiFilter);
-
-    lofiFilter.connect(dryGain); dryGain.connect(mixBus);
-    lofiFilter.connect(reverbNode); reverbNode.connect(reverbGain); reverbGain.connect(mixBus);
-    lofiFilter.connect(delayNode); delayNode.connect(delayGain); delayGain.connect(mixBus);
-
-    drumGain.connect(mixBus);
-    fxGain.connect(mixBus);
-
-    // Ambient rain/vinyl
-    rainGain = ctx.createGain(); rainGain.gain.value = 0;
-    const rainBuf = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
-    const rd = rainBuf.getChannelData(0);
-    let lastOut = 0;
-    for (let i = 0; i < rd.length; i++) {
-      const w = Math.random() * 2 - 1;
-      rd[i] = (lastOut + 0.04 * w) / 1.04;
-      lastOut = rd[i];
-      rd[i] *= 2.4;
-      if (Math.random() < 0.0005) rd[i] += (Math.random() - 0.5) * 0.7;
-    }
-    rainSource = ctx.createBufferSource();
-    rainSource.buffer = rainBuf;
-    rainSource.loop = true;
-    const rf = ctx.createBiquadFilter(); rf.type = 'bandpass'; rf.frequency.value = 1400;
-    rainSource.connect(rf); rf.connect(rainGain); rainGain.connect(mixBus);
-    rainSource.start();
-
-    mixBus.connect(limiter);
-    limiter.connect(analyser);
-    analyser.connect(ctx.destination);
-
-    // WAV recorder tap
-    state.recNode = ctx.createScriptProcessor(4096, 2, 2);
-    const silent = ctx.createGain(); silent.gain.value = 0;
-    limiter.connect(state.recNode);
-    state.recNode.connect(silent);
-    silent.connect(ctx.destination);
-    state.recNode.onaudioprocess = e => {
-      if (!state.isRecording) return;
-      state.recLeft.push(new Float32Array(e.inputBuffer.getChannelData(0)));
-      state.recRight.push(new Float32Array(e.inputBuffer.getChannelData(1)));
+  // Tab switch
+  document.querySelectorAll('.tab').forEach(t => {
+    t.onclick = () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      $('aiTab').classList.toggle('hidden', t.dataset.tab !== 'aiTab');
+      $('offlineTab').classList.toggle('hidden', t.dataset.tab !== 'offlineTab');
     };
-
-    drawVisualizer();
-  }
-
-  function createImpulse(dur, decay) {
-    const len = ctx.sampleRate * dur;
-    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
-    for (let c = 0; c < 2; c++) {
-      const d = buf.getChannelData(c);
-      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
-    }
-    return buf;
-  }
-
-  // Analyze BPM & active energy sections from AudioBuffer
-  function analyzeTrackBuffer(buf) {
-    const sr = buf.sampleRate;
-    const data = buf.getChannelData(0);
-    const fps = 100; // 10ms frames
-    const hop = Math.floor(sr / fps);
-    const frames = Math.floor(data.length / hop);
-    const env = new Float32Array(frames);
-
-    let maxRms = 0;
-    for (let i = 0; i < frames; i++) {
-      let sum = 0;
-      const base = i * hop;
-      for (let j = 0; j < hop; j += 4) {
-        const v = data[base + j];
-        sum += v * v;
-      }
-      const rms = Math.sqrt(sum / (hop / 4));
-      env[i] = rms;
-      if (rms > maxRms) maxRms = rms;
-    }
-
-    // Find start of real music (skip silence/soft intro)
-    let firstActive = 0;
-    for (let i = 0; i < frames; i++) {
-      if (env[i] > maxRms * 0.22) { firstActive = i / fps; break; }
-    }
-
-    // Onset envelope for BPM estimation (analyze up to 60s from firstActive)
-    const startF = Math.min(frames - 1, Math.floor(firstActive * fps));
-    const endF = Math.min(frames, startF + 60 * fps);
-    const len = endF - startF;
-    let bpm = 128;
-
-    if (len > 400) {
-      const onset = new Float32Array(len);
-      for (let i = 1; i < len; i++) {
-        const diff = env[startF + i] - env[startF + i - 1];
-        onset[i] = diff > 0 ? diff : 0;
-      }
-      // Autocorrelation for 85..156 BPM
-      const minLag = Math.floor((60 * fps) / 156);
-      const maxLag = Math.ceil((60 * fps) / 85);
-      let bestLag = 44, bestScore = -1;
-      for (let lag = minLag; lag <= maxLag; lag++) {
-        let corr = 0;
-        for (let i = 0; i < len - lag; i += 2) corr += onset[i] * onset[i + lag];
-        // Slight preference for common 110-144 BPM dance/pop zone
-        const candBpm = (60 * fps) / lag;
-        const weight = (candBpm >= 115 && candBpm <= 145) ? 1.12 : 1.0;
-        if (corr * weight > bestScore) {
-          bestScore = corr * weight;
-          bestLag = lag;
-        }
-      }
-      bpm = Math.round((60 * fps) / bestLag);
-      if (bpm < 80) bpm *= 2;
-      if (bpm > 165) bpm = Math.round(bpm / 2);
-    }
-
-    // Find 4 evenly spaced lively entry points across the track (skip last 12s)
-    const dur = buf.duration;
-    const usableEnd = Math.max(firstActive + 10, dur - 12);
-    const hotspots = [];
-    const sliceCount = 4;
-    const span = Math.max(8, (usableEnd - firstActive) / sliceCount);
-    for (let s = 0; s < sliceCount; s++) {
-      const wStart = Math.floor((firstActive + s * span) * fps);
-      const wEnd = Math.min(frames - 1, Math.floor((firstActive + (s + 0.65) * span) * fps));
-      // Pick strongest onset/beat near start of this section
-      let bestF = wStart, bestV = 0;
-      for (let f = wStart; f < wEnd; f++) {
-        const diff = f > 0 ? Math.max(0, env[f] - env[f - 1]) : 0;
-        if (diff > bestV && env[f] > maxRms * 0.25) {
-          bestV = diff;
-          bestF = f;
-        }
-      }
-      hotspots.push(Number((bestF / fps).toFixed(2)));
-    }
-    return { bpm, firstBeat: Number(firstActive.toFixed(2)), hotspots };
-  }
-
-  function applyPitchFlag(audio, keep) {
-    audio.preservesPitch = keep;
-    audio.mozPreservesPitch = keep;
-    audio.webkitPreservesPitch = keep;
-  }
-
-  async function addFiles(fileList) {
-    ensureAudio();
-    const files = Array.from(fileList);
-    if (!files.length) return;
-    setStatus('Đang phân tích nhịp BPM cho ' + files.length + ' bài...');
-
-    let added = 0;
-    for (const file of files) {
-      try {
-        const ab = await file.arrayBuffer();
-        const decoded = await ctx.decodeAudioData(ab.slice(0));
-        const info = analyzeTrackBuffer(decoded);
-
-        const url = URL.createObjectURL(file);
-        const audio = new Audio(url);
-        audio.preload = 'auto';
-        applyPitchFlag(audio, state.keepPitch);
-
-        const srcNode = ctx.createMediaElementSource(audio);
-        const gainNode = ctx.createGain();
-        gainNode.gain.value = 1.0;
-        srcNode.connect(gainNode);
-        gainNode.connect(musicBus);
-
-        state.tracks.push({
-          id: nextTrackId++,
-          name: file.name.replace(/\.[^/.]+$/, ''),
-          url,
-          audio,
-          srcNode,
-          gainNode,
-          duration: decoded.duration,
-          bpm: info.bpm,
-          firstBeat: info.firstBeat,
-          hotspots: info.hotspots
-        });
-        added++;
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    renderTracks();
-    if (added > 0) {
-      setStatus(`Đã thêm ${added} bài! ${state.tracks.length >= 2 ? 'Bấm "⚡ Tự Ghép Mashup" để tự nối!' : 'Bấm tên bài để nghe hoặc thêm bài nữa để Mashup.'}`);
-    } else {
-      setStatus('Không đọc được file này, thử file MP3/WAV/M4A khác nhé!');
-    }
-  }
-
-  function getTrack(id) { return state.tracks.find(t => t.id === id); }
-
-  function stopAllPlayback() {
-    clearInterval(state.mashupTimer);
-    clearInterval(state.nonstopTimer);
-    state.playMode = 'idle';
-    state.inDropSynth = false;
-    state.nonstopFading = false;
-    state.tracks.forEach(t => {
-      try { t.audio.pause(); } catch(e){}
-      if (ctx) {
-        t.gainNode.gain.cancelScheduledValues(ctx.currentTime);
-        t.gainNode.gain.setValueAtTime(1.0, ctx.currentTime);
-      }
-    });
-    $('playMashupBtn').textContent = '▶ Phát Mashup';
-    $('mashupState').textContent = state.mashupSeq.length ? `${state.mashupSeq.length} đoạn` : 'Chưa tạo';
-    $('singleBar').classList.add('hidden');
-    renderTracks();
-    renderTimeline();
-  }
-
-  function playSingleTrack(trackId) {
-    ensureAudio();
-    const t = getTrack(trackId);
-    if (!t) return;
-    if (state.playMode === 'single' && state.activeTrackId === trackId && !t.audio.paused) {
-      t.audio.pause();
-      setStatus('Đã tạm dừng: ' + t.name);
-      renderTracks();
-      return;
-    }
-    stopAllPlayback();
-    state.playMode = 'single';
-    state.activeTrackId = trackId;
-    t.audio.loop = true;
-    applyPitchFlag(t.audio, state.mode === 'nightcore' ? false : state.keepPitch);
-    t.audio.playbackRate = state.speed;
-    t.gainNode.gain.setValueAtTime(1.0, ctx.currentTime);
-    t.audio.play().catch(()=>{});
-    $('singleBar').classList.remove('hidden');
-    $('singleName').textContent = t.name;
-    setStatus('Đang phát: ' + t.name);
-    renderTracks();
-  }
-
-  function removeTrack(trackId) {
-    const idx = state.tracks.findIndex(t => t.id === trackId);
-    if (idx === -1) return;
-    stopAllPlayback();
-    const t = state.tracks[idx];
-    try {
-      t.audio.pause();
-      t.srcNode.disconnect();
-      t.gainNode.disconnect();
-      URL.revokeObjectURL(t.url);
-    } catch(e){}
-    state.tracks.splice(idx, 1);
-    state.mashupSeq = state.mashupSeq.filter(s => s.type === 'drop' || s.trackId !== trackId);
-    renderTracks();
-    renderTimeline();
-    setStatus('Đã xoá bài hát');
-  }
-
-  function clearAllTracks() {
-    stopAllPlayback();
-    state.tracks.forEach(t => {
-      try { t.audio.pause(); t.srcNode.disconnect(); t.gainNode.disconnect(); URL.revokeObjectURL(t.url); } catch(e){}
-    });
-    state.tracks = [];
-    state.mashupSeq = [];
-    renderTracks();
-    renderTimeline();
-    setStatus('Đã xoá sạch kho nhạc');
-  }
-
-  function renderTracks() {
-    $('trackCount').textContent = state.tracks.length;
-    const box = $('trackList');
-    if (!state.tracks.length) {
-      box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">Chưa có bài nào. Tải 2–4 bài vào để ghép Mashup Lộn Xộn hoặc 1 bài để Remix!</div>';
-      return;
-    }
-    box.innerHTML = state.tracks.map((t, i) => {
-      const isPlaying = !t.audio.paused;
-      return `
-        <div class="track-item ${isPlaying ? 'active' : ''}">
-          <div class="track-info" data-playtrack="${t.id}">
-            <div class="track-name">${i + 1}. ${esc(t.name)}</div>
-            <div class="track-sub">~${t.bpm} BPM • ${fmt(t.duration)} • Vào nhạc: ${fmt(t.firstBeat)}</div>
-          </div>
-          <button class="mini-btn play" data-playtrack="${t.id}">${isPlaying ? '⏸' : '▶'}</button>
-          <button class="mini-btn del" data-deltrack="${t.id}">✕</button>
-        </div>
-      `;
-    }).join('');
-  }
-
-  // AUTO MASHUP LỘN XỘN GENERATOR
-  function generateMashup() {
-    if (state.tracks.length < 2) {
-      setStatus('Cần ít nhất 2 bài trong Kho Nhạc để tự ghép Mashup Lộn Xộn!');
-      return;
-    }
-    stopAllPlayback();
-    const seq = [];
-    const n = state.tracks.length;
-    const beats = state.phraseBeats;
-
-    // Part 1: Fast alternating phrases across all songs (2 rounds)
-    for (let round = 0; round < 2; round++) {
-      for (let i = 0; i < n; i++) {
-        const t = state.tracks[i];
-        const spot = t.hotspots[round % t.hotspots.length] || t.firstBeat;
-        const beatDurOrig = 60 / t.bpm;
-        const maxStart = Math.max(0, t.duration - beats * beatDurOrig - 1);
-        seq.push({
-          type: 'track',
-          trackId: t.id,
-          startSec: Number(clamp(spot, 0, maxStart).toFixed(1)),
-          durBeats: beats,
-          label: t.name
-        });
-      }
-    }
-
-    // Middle Drop Vinahouse (like 02:00 in reference video)
-    if (state.insertDrop) {
-      seq.push({
-        type: 'drop',
-        durBeats: 16,
-        label: '💥 DROP VINAHOUSE CHUYỂN NHẠC (16 nhịp)'
-      });
-    }
-
-    // Part 2: Chorus / Climax weave across all songs (2 rounds)
-    for (let round = 2; round < 4; round++) {
-      for (let i = 0; i < n; i++) {
-        const t = state.tracks[(i + 1) % n];
-        const spot = t.hotspots[round % t.hotspots.length] || t.firstBeat;
-        const beatDurOrig = 60 / t.bpm;
-        const maxStart = Math.max(0, t.duration - beats * beatDurOrig - 1);
-        seq.push({
-          type: 'track',
-          trackId: t.id,
-          startSec: Number(clamp(spot, 0, maxStart).toFixed(1)),
-          durBeats: beats,
-          label: t.name
-        });
-      }
-    }
-
-    state.mashupSeq = seq;
-    state.mashupIdx = 0;
-    $('mashupState').textContent = `${seq.length} đoạn đã sẵn sàng`;
-    renderTimeline();
-    setStatus(`Đã tự tạo kịch bản Mashup ${n}in1 (${seq.length} đoạn)! Bấm "▶ Phát Mashup" để nghe thử.`);
-  }
-
-  function getSegPlayDurationSec(seg) {
-    return seg.durBeats * (60 / state.targetBpm);
-  }
-
-  function getSegTrackRate(track) {
-    return clamp(state.targetBpm / track.bpm, 0.72, 1.45);
-  }
-
-  function renderTimeline() {
-    const box = $('timelineBox');
-    if (!state.mashupSeq.length) {
-      box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">Thêm ít nhất 2 bài ở trên rồi bấm "⚡ Tự Ghép Mashup" để app tự cắt nối đan xen.</div>';
-      return;
-    }
-    box.innerHTML = state.mashupSeq.map((seg, i) => {
-      const isPlaying = state.playMode === 'mashup' && i === state.mashupIdx;
-      if (seg.type === 'drop') {
-        return `
-          <div class="seg-item drop-seg ${isPlaying ? 'playing' : ''}">
-            <div class="seg-top">
-              <span class="seg-title">${i + 1}. ${esc(seg.label)}</span>
-              <span class="seg-time">${getSegPlayDurationSec(seg).toFixed(1)}s</span>
-            </div>
-            <div class="seg-actions">
-              <button class="mini-btn play" data-segplay="${i}">▶ Nghe từ đây</button>
-              <button class="mini-btn del" data-segdel="${i}">✕ Bỏ Drop</button>
-            </div>
-          </div>
-        `;
-      }
-      const t = getTrack(seg.trackId);
-      const rate = t ? getSegTrackRate(t) : 1;
-      const spanOrig = getSegPlayDurationSec(seg) * rate;
-      const endSec = seg.startSec + spanOrig;
-      return `
-        <div class="seg-item ${isPlaying ? 'playing' : ''}">
-          <div class="seg-top">
-            <span class="seg-title">${i + 1}. ${esc(seg.label)}</span>
-            <span class="seg-time">${fmt(seg.startSec)} → ${fmt(endSec)}</span>
-          </div>
-          <div class="seg-actions">
-            <button class="mini-btn" data-shift="${i}:-0.5">◀ -0.5s</button>
-            <button class="mini-btn" data-shift="${i}:0.5">+0.5s ▶</button>
-            <button class="mini-btn play" data-segplay="${i}">▶ Nghe</button>
-            <button class="mini-btn del" data-segdel="${i}">✕</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  function startSegment(idx, isCrossfadeIn = false) {
-    const seg = state.mashupSeq[idx];
-    if (!seg) { stopAllPlayback(); setStatus('Đã phát hết bản Mashup!'); return; }
-
-    state.mashupIdx = idx;
-    state.cuedNext = false;
-    const playDur = getSegPlayDurationSec(seg);
-    state.segEndTime = performance.now() + playDur * 1000;
-
-    if (seg.type === 'drop') {
-      state.inDropSynth = true;
-      state.bpm = state.targetBpm;
-      $('bpm').value = state.bpm;
-      $('bpmVal').textContent = state.bpm;
-      if (!state.drumOn) setDrum(true);
-      playFX('drop');
-      setStatus(`Đang đánh đoạn Drop (${idx + 1}/${state.mashupSeq.length})`);
-    } else {
-      state.inDropSynth = false;
-      const t = getTrack(seg.trackId);
-      if (t) {
-        const rate = getSegTrackRate(t);
-        t.audio.loop = false;
-        applyPitchFlag(t.audio, state.keepPitch);
-        t.audio.playbackRate = rate;
-        if (!isCrossfadeIn) {
-          t.audio.currentTime = seg.startSec;
-          t.gainNode.gain.cancelScheduledValues(ctx.currentTime);
-          t.gainNode.gain.setValueAtTime(1.0, ctx.currentTime);
-          t.audio.play().catch(()=>{});
-        }
-        setStatus(`Mashup [${idx + 1}/${state.mashupSeq.length}]: ${t.name} (${rate.toFixed(2)}x)`);
-      }
-    }
-    $('mashupState').textContent = `Đoạn ${idx + 1}/${state.mashupSeq.length}`;
-    renderTracks();
-    renderTimeline();
-  }
-
-  function playMashupFrom(startIdx = 0) {
-    if (!state.mashupSeq.length) {
-      generateMashup();
-      if (!state.mashupSeq.length) return;
-    }
-    ensureAudio();
-    stopAllPlayback();
-
-    state.playMode = 'mashup';
-    state.bpm = state.targetBpm;
-    $('bpm').value = state.bpm;
-    $('bpmVal').textContent = state.bpm;
-    $('playMashupBtn').textContent = '⏸ Dừng Mashup';
-
-    startSegment(startIdx, false);
-
-    state.mashupTimer = setInterval(() => {
-      if (state.playMode !== 'mashup') return;
-      const nowMs = performance.now();
-      const remMs = state.segEndTime - nowMs;
-      const curSeg = state.mashupSeq[state.mashupIdx];
-      const nextIdx = state.mashupIdx + 1;
-      const nextSeg = state.mashupSeq[nextIdx];
-
-      // Pre-cue & smooth 380ms crossfade before segment ends
-      if (remMs <= 380 && !state.cuedNext) {
-        state.cuedNext = true;
-        const tNow = ctx.currentTime;
-        const fadeSec = Math.max(0.15, remMs / 1000);
-
-        // Fade out current track
-        if (curSeg && curSeg.type === 'track') {
-          const curT = getTrack(curSeg.trackId);
-          if (curT) {
-            curT.gainNode.gain.cancelScheduledValues(tNow);
-            curT.gainNode.gain.setValueAtTime(curT.gainNode.gain.value, tNow);
-            curT.gainNode.gain.linearRampToValueAtTime(0.001, tNow + fadeSec);
-          }
-        }
-
-        // Fade in next track if it's a different audio element
-        if (nextSeg && nextSeg.type === 'track') {
-          const nextT = getTrack(nextSeg.trackId);
-          const sameAsCur = curSeg && curSeg.type === 'track' && curSeg.trackId === nextSeg.trackId;
-          if (nextT && !sameAsCur) {
-            applyPitchFlag(nextT.audio, state.keepPitch);
-            nextT.audio.playbackRate = getSegTrackRate(nextT);
-            nextT.audio.currentTime = nextSeg.startSec;
-            nextT.gainNode.gain.cancelScheduledValues(tNow);
-            nextT.gainNode.gain.setValueAtTime(0.001, tNow);
-            nextT.gainNode.gain.linearRampToValueAtTime(1.0, tNow + fadeSec);
-            nextT.audio.play().catch(()=>{});
-          }
-        } else if (nextSeg && nextSeg.type === 'drop') {
-          playFX('riserShort');
-        }
-      }
-
-      // Switch segment
-      if (remMs <= 0) {
-        if (curSeg && curSeg.type === 'track') {
-          const curT = getTrack(curSeg.trackId);
-          const sameAsNext = nextSeg && nextSeg.type === 'track' && nextSeg.trackId === curSeg.trackId;
-          if (curT && !sameAsNext) {
-            try { curT.audio.pause(); } catch(e){}
-          }
-        }
-        if (nextIdx >= state.mashupSeq.length) {
-          stopAllPlayback();
-          setStatus('Hoàn thành bản Mashup! Bấm "■ Dừng & Lưu" nếu đang ghi âm.');
-        } else {
-          const alreadyFaded = nextSeg.type === 'track' && !(curSeg.type === 'track' && curSeg.trackId === nextSeg.trackId);
-          startSegment(nextIdx, alreadyFaded);
-        }
-      }
-    }, 40);
-  }
-
-  // NONSTOP MODE (full track to full track with 6s crossfade)
-  function startNonstop() {
-    if (state.tracks.length < 2) {
-      setStatus('Thêm ít nhất 2 bài vào Kho Nhạc để chạy Nonstop nhé!');
-      return;
-    }
-    ensureAudio();
-    stopAllPlayback();
-    state.playMode = 'nonstop';
-    state.nonstopIdx = 0;
-    state.nonstopFading = false;
-
-    const first = state.tracks[0];
-    applyPitchFlag(first.audio, state.keepPitch);
-    first.audio.playbackRate = state.speed;
-    first.audio.loop = false;
-    first.audio.currentTime = first.firstBeat;
-    first.gainNode.gain.setValueAtTime(1.0, ctx.currentTime);
-    first.audio.play().catch(()=>{});
-    setStatus('Nonstop đang phát: ' + first.name);
-    renderTracks();
-
-    state.nonstopTimer = setInterval(() => {
-      if (state.playMode !== 'nonstop' || state.nonstopFading) return;
-      const cur = state.tracks[state.nonstopIdx];
-      if (!cur) return;
-      const rem = (cur.duration - cur.audio.currentTime) / cur.audio.playbackRate;
-      if (rem <= 6.0) {
-        state.nonstopFading = true;
-        const nextIdx = (state.nonstopIdx + 1) % state.tracks.length;
-        const next = state.tracks[nextIdx];
-        const tNow = ctx.currentTime;
-
-        applyPitchFlag(next.audio, state.keepPitch);
-        next.audio.playbackRate = state.speed;
-        next.audio.loop = false;
-        next.audio.currentTime = next.firstBeat;
-        next.gainNode.gain.cancelScheduledValues(tNow);
-        next.gainNode.gain.setValueAtTime(0.001, tNow);
-        next.gainNode.gain.linearRampToValueAtTime(1.0, tNow + 5.5);
-        next.audio.play().catch(()=>{});
-
-        cur.gainNode.gain.cancelScheduledValues(tNow);
-        cur.gainNode.gain.setValueAtTime(1.0, tNow);
-        cur.gainNode.gain.linearRampToValueAtTime(0.001, tNow + 5.5);
-        playFX('riser');
-        setStatus('Nonstop đang nối mượt sang: ' + next.name);
-
-        setTimeout(() => {
-          if (state.playMode !== 'nonstop') return;
-          try { cur.audio.pause(); } catch(e){}
-          state.nonstopIdx = nextIdx;
-          state.nonstopFading = false;
-          renderTracks();
-        }, 5600);
-      }
-    }, 300);
-  }
-
-  // DRUMS + SIDECHAIN + DROP SYNTH
-  function triggerKick(time, heavy = true) {
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.frequency.setValueAtTime(heavy ? 160 : 115, time);
-    osc.frequency.exponentialRampToValueAtTime(38, time + 0.13);
-    g.gain.setValueAtTime(heavy ? 1.0 : 0.72, time);
-    g.gain.exponentialRampToValueAtTime(0.001, time + 0.24);
-    osc.connect(g); g.connect(drumGain);
-    osc.start(time); osc.stop(time + 0.25);
-
-    // Sidechain pumping on music bus
-    if (state.sidechainOn && sidechainGain) {
-      sidechainGain.gain.cancelScheduledValues(time);
-      sidechainGain.gain.setValueAtTime(0.35, time);
-      sidechainGain.gain.exponentialRampToValueAtTime(1.0, time + 0.18);
-    }
-  }
-  function triggerSnare(time, soft = false) {
-    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.14, ctx.sampleRate);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    const src = ctx.createBufferSource(); src.buffer = buf;
-    const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = soft ? 900 : 1500;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(soft ? 0.32 : 0.58, time);
-    g.gain.exponentialRampToValueAtTime(0.001, time + 0.13);
-    src.connect(f); f.connect(g); g.connect(drumGain);
-    src.start(time);
-  }
-  function triggerHat(time, open = false) {
-    const len = open ? 0.13 : 0.04;
-    const buf = ctx.createBuffer(1, ctx.sampleRate * len, ctx.sampleRate);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    const src = ctx.createBufferSource(); src.buffer = buf;
-    const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 6800;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(open ? 0.28 : 0.2, time);
-    g.gain.exponentialRampToValueAtTime(0.001, time + len);
-    src.connect(f); f.connect(g); g.connect(drumGain);
-    src.start(time);
-  }
-  function triggerOffBass(time, freq = 65.4) {
-    const osc = ctx.createOscillator();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(freq, time);
-    const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 300;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.62, time);
-    g.gain.exponentialRampToValueAtTime(0.001, time + 0.17);
-    osc.connect(f); f.connect(g); g.connect(drumGain);
-    osc.start(time); osc.stop(time + 0.18);
-  }
-  function triggerDropLead(time, step) {
-    const notes = [440, 0, 523.3, 440, 392, 0, 440, 523.3, 587.3, 0, 523.3, 440, 392, 329.6, 392, 0];
-    const freq = notes[step % notes.length];
-    if (!freq) return;
-    const osc = ctx.createOscillator();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(freq, time);
-    const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 2400;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.24, time);
-    g.gain.exponentialRampToValueAtTime(0.001, time + 0.14);
-    osc.connect(f); f.connect(g); g.connect(drumGain);
-    osc.start(time); osc.stop(time + 0.15);
-  }
-
-  function stepDrum() {
-    if (!state.drumOn || !ctx) return;
-    const s = state.drumStep % 16;
-    const t = ctx.currentTime + 0.02;
-    const st = state.inDropSynth ? 'vinahouse' : state.drumStyle;
-
-    if (st === 'vinahouse') {
-      if (s % 4 === 0) triggerKick(t, true);
-      if (s % 4 === 2) {
-        const bassSeq = [55, 55, 65.4, 73.4];
-        triggerOffBass(t, bassSeq[Math.floor(s / 4)]);
-        triggerHat(t, true);
-      }
-      if (s === 4 || s === 12) triggerSnare(t, false);
-      if (state.inDropSynth) triggerDropLead(t, s);
-    } else if (st === 'edm') {
-      if (s % 4 === 0) triggerKick(t, true);
-      if (s === 4 || s === 12) triggerSnare(t, false);
-      if (s % 2 === 1) triggerHat(t, false);
-    } else if (st === 'lofi') {
-      if (s === 0 || s === 7 || s === 10) triggerKick(t, false);
-      if (s === 4 || s === 12) triggerSnare(t, true);
-      if (s % 2 === 0) triggerHat(t, false);
-    } else if (st === 'trap') {
-      if (s === 0 || s === 6 || s === 10) triggerKick(t, true);
-      if (s === 8) triggerSnare(t, false);
-      if (s % 2 === 0 || s >= 12) triggerHat(t, false);
-    }
-    state.drumStep++;
-    state.drumTimer = setTimeout(stepDrum, (60 / state.bpm / 4) * 1000);
-  }
-
-  function setDrum(on) {
-    ensureAudio();
-    state.drumOn = on;
-    clearTimeout(state.drumTimer);
-    $('drumToggleBtn').textContent = on ? 'Trống: ĐANG CHẠY' : 'Trống: TẮT';
-    $('drumToggleBtn').style.background = on ? '#10b981' : '';
-    if (on) stepDrum();
-  }
-
-  function setDrumStyle(style) {
-    state.drumStyle = style;
-    document.querySelectorAll('.drum-style').forEach(b => {
-      b.style.borderColor = b.dataset.style === style ? '#22d3ee' : '';
-      b.style.background = b.dataset.style === style ? 'rgba(34,211,238,0.2)' : '';
-    });
-  }
-
-  // DJ FX
-  function playFX(type) {
-    ensureAudio();
-    const t = ctx.currentTime;
-    if (type === 'drop') {
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.frequency.setValueAtTime(155, t);
-      osc.frequency.exponentialRampToValueAtTime(28, t + 1.4);
-      g.gain.setValueAtTime(1.0, t);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
-      osc.connect(g); g.connect(fxGain);
-      osc.start(t); osc.stop(t + 1.55);
-    } else if (type === 'riser' || type === 'riserShort') {
-      const dur = type === 'riserShort' ? 0.45 : 2.0;
-      const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
-      const d = buf.getChannelData(0);
-      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-      const src = ctx.createBufferSource(); src.buffer = buf;
-      const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 3;
-      f.frequency.setValueAtTime(300, t);
-      f.frequency.exponentialRampToValueAtTime(6000, t + dur - 0.05);
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.05, t);
-      g.gain.linearRampToValueAtTime(0.65, t + dur - 0.08);
-      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-      src.connect(f); f.connect(g); g.connect(fxGain);
-      src.start(t);
-    } else if (type === 'horn') {
-      [0, 0.16, 0.34].forEach((off, idx) => {
-        const dur = idx === 2 ? 0.55 : 0.13;
-        [392, 415, 466].forEach(freq => {
-          const osc = ctx.createOscillator(); osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(freq, t + off);
-          const g = ctx.createGain();
-          g.gain.setValueAtTime(0.18, t + off);
-          g.gain.exponentialRampToValueAtTime(0.001, t + off + dur);
-          osc.connect(g); g.connect(fxGain);
-          osc.start(t + off); osc.stop(t + off + dur + 0.02);
-        });
-      });
-    } else if (type === 'stutter') {
-      // Repeat/stutter active playing track 4 times fast
-      const active = state.tracks.find(tr => !tr.audio.paused);
-      if (!active) return;
-      const anchor = Math.max(0, active.audio.currentTime - 0.18);
-      let count = 0;
-      const st = setInterval(() => {
-        active.audio.currentTime = anchor;
-        count++;
-        if (count >= 4) clearInterval(st);
-      }, 170);
-    }
-  }
-
-  // CONTROLS & PRESETS
-  function applyControls() {
-    if (!ctx) return;
-    state.speed = Number($('speed').value);
-    $('speedVal').textContent = state.speed.toFixed(2) + 'x';
-    if (state.playMode === 'single' && state.activeTrackId) {
-      const t = getTrack(state.activeTrackId);
-      if (t) {
-        applyPitchFlag(t.audio, state.mode === 'nightcore' ? false : state.keepPitch);
-        t.audio.playbackRate = state.speed;
-      }
-    }
-
-    eqLow.gain.value = Number($('bass').value);
-    $('bassVal').textContent = $('bass').value + ' dB';
-    eqMid.gain.value = Number($('mid').value);
-    $('midVal').textContent = $('mid').value + ' dB';
-    eqHigh.gain.value = Number($('treble').value);
-    $('trebleVal').textContent = $('treble').value + ' dB';
-
-    reverbGain.gain.value = (Number($('reverb').value) / 100) * 0.9;
-    $('reverbVal').textContent = $('reverb').value + '%';
-    delayGain.gain.value = (Number($('echo').value) / 100) * 0.7;
-    $('echoVal').textContent = $('echo').value + '%';
-
-    const fl = Number($('filter').value);
-    lofiFilter.frequency.setTargetAtTime(fl, ctx.currentTime, 0.05);
-    $('filterVal').textContent = fl + ' Hz';
-    rainGain.gain.setTargetAtTime((Number($('rain').value) / 100) * 0.45, ctx.currentTime, 0.05);
-    $('rainVal').textContent = $('rain').value + '%';
-
-    state.bpm = Number($('bpm').value);
-    $('bpmVal').textContent = state.bpm;
-    drumGain.gain.value = Number($('drumVol').value) / 100;
-    $('drumVolVal').textContent = $('drumVol').value + '%';
-
-    bassCutFilter.frequency.setTargetAtTime(state.bassCutOn ? 140 : 20, ctx.currentTime, 0.05);
-  }
-
-  function syncTogglesUI() {
-    $('togglePitch').textContent = 'Giữ tông giọng: ' + (state.keepPitch ? 'BẬT' : 'TẮT');
-    $('togglePitch').classList.toggle('on', state.keepPitch);
-    $('toggleDrop').textContent = 'Chèn Drop giữa: ' + (state.insertDrop ? 'BẬT' : 'TẮT');
-    $('toggleDrop').classList.toggle('on', state.insertDrop);
-    $('toggleSidechain').textContent = 'Nhún nhịp Sidechain: ' + (state.sidechainOn ? 'BẬT' : 'TẮT');
-    $('toggleSidechain').classList.toggle('on', state.sidechainOn);
-    $('toggleBassCut').textContent = 'Lọc Bass cũ (Chống ù): ' + (state.bassCutOn ? 'BẬT' : 'TẮT');
-    $('toggleBassCut').classList.toggle('on', state.bassCutOn);
-  }
-
-  function applyMode(mode) {
-    ensureAudio();
-    state.mode = mode;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-    const names = {
-      original: 'Gốc', chill: 'Chill / Lo-fi', vinahouse: 'Vinahouse (Giữ tông)',
-      nightcore: 'Nightcore', mashup: 'Mashup 4in1 Lộn Xộn', nonstop: 'Nonstop'
-    };
-    $('modeLabel').textContent = 'Chế độ: ' + names[mode];
-
-    if (mode === 'original') {
-      $('speed').value = 1.00; $('bass').value = 0; $('mid').value = 0; $('treble').value = 0;
-      $('reverb').value = 0; $('echo').value = 0; $('filter').value = 20000; $('rain').value = 0;
-      state.keepPitch = true; state.bassCutOn = false; setDrum(false);
-    } else if (mode === 'chill') {
-      $('speed').value = 0.85; $('bass').value = 3; $('mid').value = -2; $('treble').value = -4;
-      $('reverb').value = 46; $('echo').value = 18; $('filter').value = 3500; $('rain').value = 26;
-      state.keepPitch = true; state.bassCutOn = false; state.sidechainOn = false;
-      setDrumStyle('lofi'); $('bpm').value = 84; setDrum(true);
-    } else if (mode === 'vinahouse') {
-      $('speed').value = 1.28; $('bass').value = 7; $('mid').value = 2; $('treble').value = 4;
-      $('reverb').value = 14; $('echo').value = 12; $('filter').value = 20000; $('rain').value = 0;
-      state.keepPitch = true; state.bassCutOn = true; state.sidechainOn = true;
-      setDrumStyle('vinahouse'); $('bpm').value = 136; setDrum(true);
-    } else if (mode === 'nightcore') {
-      $('speed').value = 1.25; $('bass').value = 3; $('mid').value = 2; $('treble').value = 5;
-      $('reverb').value = 12; $('echo').value = 0; $('filter').value = 20000; $('rain').value = 0;
-      state.keepPitch = false; state.bassCutOn = false; setDrum(false);
-    } else if (mode === 'mashup') {
-      $('bass').value = 5; $('mid').value = 1; $('treble').value = 3;
-      $('reverb').value = 14; $('echo').value = 10; $('filter').value = 20000; $('rain').value = 0;
-      state.keepPitch = true; state.bassCutOn = false; state.sidechainOn = true;
-      setDrumStyle('vinahouse');
-      if (state.tracks.length >= 2) {
-        if (!state.mashupSeq.length) generateMashup();
-        playMashupFrom(0);
-      } else {
-        setStatus('Chế độ Mashup: Hãy bấm "➕ Thêm 1 hoặc nhiều bài" (từ 2 bài trở lên)!');
-      }
-    } else if (mode === 'nonstop') {
-      $('speed').value = 1.12; $('bass').value = 6; $('mid').value = 0; $('treble').value = 3;
-      $('reverb').value = 16; $('echo').value = 10; $('filter').value = 20000; $('rain').value = 0;
-      state.keepPitch = true; state.bassCutOn = false;
-      if (state.tracks.length >= 2) startNonstop();
-      else setStatus('Thêm từ 2 bài trở lên rồi bấm Nonstop!');
-    }
-    syncTogglesUI();
-    applyControls();
-  }
-
-  // WAV EXPORT
-  function exportWav(leftArr, rightArr, sr) {
-    let totalLen = 0;
-    leftArr.forEach(b => totalLen += b.length);
-    const buf = new ArrayBuffer(44 + totalLen * 4);
-    const v = new DataView(buf);
-    const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-    ws(0, 'RIFF'); v.setUint32(4, 36 + totalLen * 4, true); ws(8, 'WAVE'); ws(12, 'fmt ');
-    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 2, true);
-    v.setUint32(24, sr, true); v.setUint32(28, sr * 4, true); v.setUint16(32, 4, true);
-    v.setUint16(34, 16, true); ws(36, 'data'); v.setUint32(40, totalLen * 4, true);
-    let off = 44;
-    for (let i = 0; i < leftArr.length; i++) {
-      const L = leftArr[i], R = rightArr[i];
-      for (let j = 0; j < L.length; j++) {
-        const sL = clamp(L[j], -1, 1), sR = clamp(R[j], -1, 1);
-        v.setInt16(off, sL < 0 ? sL * 0x8000 : sL * 0x7FFF, true);
-        v.setInt16(off + 2, sR < 0 ? sR * 0x8000 : sR * 0x7FFF, true);
-        off += 4;
-      }
-    }
-    return new Blob([v], { type: 'audio/wav' });
-  }
-
-  function toggleRecord() {
-    ensureAudio();
-    const btn = $('recBtn');
-    if (!state.isRecording) {
-      state.recLeft = []; state.recRight = []; state.isRecording = true;
-      btn.textContent = '■ Dừng & Lưu';
-      btn.classList.add('recording');
-      setStatus('Đang ghi âm bản Mashup / Remix...');
-    } else {
-      state.isRecording = false;
-      btn.textContent = '● Ghi âm';
-      btn.classList.remove('recording');
-      if (!state.recLeft.length) { setStatus('Chưa có âm thanh nào được ghi!'); return; }
-      const blob = exportWav(state.recLeft, state.recRight, ctx.sampleRate);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `AutoRemix_${state.mode}_${Date.now()}.wav`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 5000);
-      setStatus('Đang lưu file WAV vào Downloads/AutoRemix...');
-    }
-  }
-
-  function drawVisualizer() {
-    const canvas = $('viz');
-    const c = canvas.getContext('2d');
-    const data = new Uint8Array(analyser.frequencyBinCount);
-    function loop() {
-      requestAnimationFrame(loop);
-      analyser.getByteFrequencyData(data);
-      c.fillStyle = '#07070d';
-      c.fillRect(0, 0, canvas.width, canvas.height);
-      const barW = (canvas.width / data.length) - 2;
-      for (let i = 0; i < data.length; i++) {
-        const h = (data[i] / 255) * canvas.height;
-        const grad = c.createLinearGradient(0, canvas.height, 0, canvas.height - h);
-        grad.addColorStop(0, '#7c3aed');
-        grad.addColorStop(1, '#22d3ee');
-        c.fillStyle = grad;
-        c.fillRect(i * (barW + 2), canvas.height - h, barW, h);
-      }
-    }
-    loop();
-  }
-
-  // Update single track progress
-  setInterval(() => {
-    if (state.playMode === 'single' && state.activeTrackId) {
-      const t = getTrack(state.activeTrackId);
-      if (t && t.duration) {
-        $('singleTime').textContent = `${fmt(t.audio.currentTime)} / ${fmt(t.duration)}`;
-        $('singleSeek').value = Math.min(100, (t.audio.currentTime / t.duration) * 100);
-      }
-    }
-  }, 250);
-
-  // EVENTS
-  $('addTracksBtn').onclick = () => $('fileTracks').click();
-  $('fileTracks').onchange = e => { if (e.target.files.length) addFiles(e.target.files); e.target.value = ''; };
-  $('clearAllTracksBtn').onclick = clearAllTracks;
-  $('stopAllBtn').onclick = () => { stopAllPlayback(); setDrum(false); setStatus('Đã dừng toàn bộ nhạc'); };
-
-  $('trackList').onclick = e => {
-    const del = e.target.closest('[data-deltrack]');
-    if (del) { removeTrack(Number(del.dataset.deltrack)); return; }
-    const play = e.target.closest('[data-playtrack]');
-    if (play) { playSingleTrack(Number(play.dataset.playtrack)); }
-  };
-
-  $('singleSeek').oninput = () => {
-    const t = getTrack(state.activeTrackId);
-    if (t && t.duration) t.audio.currentTime = (Number($('singleSeek').value) / 100) * t.duration;
-  };
-
-  $('phraseChips').onclick = e => {
-    const ch = e.target.closest('[data-beats]');
-    if (!ch) return;
-    state.phraseBeats = Number(ch.dataset.beats);
-    document.querySelectorAll('#phraseChips .chip').forEach(x => x.classList.toggle('active', x === ch));
-    if (state.tracks.length >= 2) generateMashup();
-  };
-
-  $('targetBpm').oninput = () => {
-    state.targetBpm = Number($('targetBpm').value);
-    $('targetBpmVal').textContent = state.targetBpm + ' BPM';
-    $('bpm').value = state.targetBpm;
-    $('bpmVal').textContent = state.targetBpm;
-    state.bpm = state.targetBpm;
-    renderTimeline();
-  };
-
-  $('togglePitch').onclick = () => { state.keepPitch = !state.keepPitch; syncTogglesUI(); applyControls(); };
-  $('toggleDrop').onclick = () => { state.insertDrop = !state.insertDrop; syncTogglesUI(); if (state.mashupSeq.length) generateMashup(); };
-  $('toggleSidechain').onclick = () => { state.sidechainOn = !state.sidechainOn; syncTogglesUI(); };
-  $('toggleBassCut').onclick = () => { state.bassCutOn = !state.bassCutOn; syncTogglesUI(); applyControls(); };
-
-  $('genMashupBtn').onclick = generateMashup;
-  $('playMashupBtn').onclick = () => {
-    if (state.playMode === 'mashup') stopAllPlayback();
-    else playMashupFrom(0);
-  };
-  $('startNonstopBtn').onclick = startNonstop;
-
-  $('timelineBox').onclick = e => {
-    const sh = e.target.closest('[data-shift]');
-    if (sh) {
-      const [idxStr, deltaStr] = sh.dataset.shift.split(':');
-      const seg = state.mashupSeq[Number(idxStr)];
-      const t = seg && getTrack(seg.trackId);
-      if (seg && t) {
-        seg.startSec = Number(clamp(seg.startSec + Number(deltaStr), 0, Math.max(0, t.duration - 2)).toFixed(1));
-        renderTimeline();
-      }
-      return;
-    }
-    const sp = e.target.closest('[data-segplay]');
-    if (sp) { playMashupFrom(Number(sp.dataset.segplay)); return; }
-    const sd = e.target.closest('[data-segdel]');
-    if (sd) {
-      state.mashupSeq.splice(Number(sd.dataset.segdel), 1);
-      renderTimeline();
-    }
-  };
-
-  document.querySelectorAll('.mode-btn').forEach(b => b.onclick = () => applyMode(b.dataset.mode));
-  $('drumToggleBtn').onclick = () => setDrum(!state.drumOn);
-  document.querySelectorAll('.drum-style').forEach(b => b.onclick = () => setDrumStyle(b.dataset.style));
-  document.querySelectorAll('.fx-pad').forEach(b => b.onclick = () => playFX(b.dataset.fx));
-  $('recBtn').onclick = toggleRecord;
-  ['speed','bass','mid','treble','reverb','echo','filter','rain','bpm','drumVol'].forEach(id => {
-    $(id).oninput = applyControls;
   });
 
-  setDrumStyle('vinahouse');
-  syncTogglesUI();
+  // ==================== TAB 1: AI SERVER LOGIC ====================
+  const aiState = {
+    files: [], // { file, name, useVocal }
+    beatIndex: 0,
+    phraseBeats: 16,
+    autoKey: true,
+    insertDrop: true,
+    pollTimer: null,
+    resultBlob: null,
+    resultName: 'AI_Mashup.mp3'
+  };
+
+  $('serverUrl').value = localStorage.getItem('autoremix_server_url') || '';
+  $('serverUrl').onchange = () => {
+    const u = $('serverUrl').value.trim().replace(/\/+$/, '');
+    $('serverUrl').value = u;
+    localStorage.setItem('autoremix_server_url', u);
+  };
+
+  function getServerUrl() {
+    const u = $('serverUrl').value.trim().replace(/\/+$/, '');
+    localStorage.setItem('autoremix_server_url', u);
+    return u;
+  }
+
+  $('testConnBtn').onclick = async () => {
+    const url = getServerUrl();
+    if (!url) { $('connBadge').textContent = 'Chưa dán link'; return; }
+    $('connBadge').textContent = 'Đang thử...';
+    $('connBadge').style.color = '#f59e0b';
+    try {
+      const res = await fetch(url + '/api/health');
+      const data = await res.json();
+      if (data.ok) {
+        $('connBadge').textContent = data.gpu ? '🟢 Đã nối (GPU)' : '🟢 Đã nối (CPU)';
+        $('connBadge').style.color = '#10b981';
+      } else throw new Error();
+    } catch (e) {
+      $('connBadge').textContent = '🔴 Không kết nối được';
+      $('connBadge').style.color = '#ef4444';
+    }
+  };
+
+  function renderAiFiles() {
+    $('aiCount').textContent = aiState.files.length;
+    const box = $('aiFileList');
+    if (!aiState.files.length) {
+      box.innerHTML = `<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">
+        • <b>Mashup nhiều bài:</b> Nạp 2–4 bài, chọn 1 bài làm <b>Beat nền</b>, tích <b>Lấy lời</b> cả 2–4 bài.<br>
+        • <b>Remix 1 bài:</b> Nạp bài gốc (chỉ tích <b>Lấy lời</b>) + 1 file Beat Vinahouse (chỉ chọn <b>Beat nền</b>).
+      </div>`;
+      return;
+    }
+    if (aiState.beatIndex >= aiState.files.length) aiState.beatIndex = 0;
+
+    box.innerHTML = aiState.files.map((item, i) => `
+      <div class="file-item">
+        <div class="file-top">
+          <span class="file-name">${i + 1}. ${esc(item.name)}</span>
+          <button class="del-btn" data-del="${i}">✕</button>
+        </div>
+        <div class="file-controls">
+          <div class="pill-btn ${aiState.beatIndex === i ? 'beat-on' : ''}" data-beat="${i}">
+            ${aiState.beatIndex === i ? '🥁 ĐANG LÀM BEAT NỀN' : '🥁 Chọn làm Beat'}
+          </div>
+          <div class="pill-btn ${item.useVocal ? 'voc-on' : ''}" data-voc="${i}">
+            ${item.useVocal ? '🎤 Lấy Lời: CÓ' : '🎤 Lấy Lời: KHÔNG'}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  $('addAiFilesBtn').onclick = () => $('aiFileInput').click();
+  $('aiFileInput').onchange = e => {
+    Array.from(e.target.files).forEach(f => {
+      aiState.files.push({ file: f, name: f.name.replace(/\.[^/.]+$/, ''), useVocal: true });
+    });
+    e.target.value = '';
+    renderAiFiles();
+  };
+  $('clearAiFiles').onclick = () => { aiState.files = []; aiState.beatIndex = 0; renderAiFiles(); };
+
+  $('aiFileList').onclick = e => {
+    const d = e.target.closest('[data-del]');
+    if (d) { aiState.files.splice(Number(d.dataset.del), 1); renderAiFiles(); return; }
+    const b = e.target.closest('[data-beat]');
+    if (b) { aiState.beatIndex = Number(b.dataset.beat); renderAiFiles(); return; }
+    const v = e.target.closest('[data-voc]');
+    if (v) {
+      const idx = Number(v.dataset.voc);
+      aiState.files[idx].useVocal = !aiState.files[idx].useVocal;
+      renderAiFiles();
+    }
+  };
+
+  $('aiPhraseChips').onclick = e => {
+    const ch = e.target.closest('[data-beats]');
+    if (!ch) return;
+    aiState.phraseBeats = Number(ch.dataset.beats);
+    document.querySelectorAll('#aiPhraseChips .chip').forEach(x => x.classList.toggle('active', x === ch));
+  };
+  $('aiAutoKey').onclick = () => {
+    aiState.autoKey = !aiState.autoKey;
+    $('aiAutoKey').textContent = 'Tự khớp tông: ' + (aiState.autoKey ? 'BẬT' : 'TẮT');
+    $('aiAutoKey').classList.toggle('on', aiState.autoKey);
+  };
+  $('aiDrop').onclick = () => {
+    aiState.insertDrop = !aiState.insertDrop;
+    $('aiDrop').textContent = 'Chèn Drop giữa: ' + (aiState.insertDrop ? 'BẬT' : 'TẮT');
+    $('aiDrop').classList.toggle('on', aiState.insertDrop);
+  };
+  $('aiBpm').oninput = () => {
+    const v = Number($('aiBpm').value);
+    $('aiBpmVal').textContent = v < 85 ? 'Tự theo Beat nền' : (v + ' BPM');
+  };
+
+  $('runAiBtn').onclick = async () => {
+    const url = getServerUrl();
+    if (!url) { $('aiStatus').textContent = '❌ Hãy dán link Google Colab ở mục 1 trước!'; return; }
+    if (!aiState.files.length) { $('aiStatus').textContent = '❌ Hãy thêm ít nhất 1–2 bài nhạc!'; return; }
+    const vocalIndices = aiState.files.map((x, i) => x.useVocal ? i : -1).filter(i => i >= 0);
+    if (!vocalIndices.length) { $('aiStatus').textContent = '❌ Phải tích "Lấy Lời: CÓ" cho ít nhất 1 bài!'; return; }
+
+    clearInterval(aiState.pollTimer);
+    $('runAiBtn').disabled = true;
+    $('resultCard').classList.add('hidden');
+    $('progFill').style.width = '5%';
+    $('aiStatus').textContent = '📤 Đang tải các file nhạc lên Server AI...';
+
+    try {
+      const fd = new FormData();
+      aiState.files.forEach(item => fd.append('files', item.file));
+      fd.append('beat_index', String(aiState.beatIndex));
+      fd.append('vocal_indices', JSON.stringify(vocalIndices));
+      fd.append('phrase_beats', String(aiState.phraseBeats));
+      const bpmVal = Number($('aiBpm').value);
+      fd.append('custom_bpm', String(bpmVal < 85 ? 0 : bpmVal));
+      fd.append('auto_key', String(aiState.autoKey));
+      fd.append('insert_drop', String(aiState.insertDrop));
+
+      const res = await fetch(url + '/api/start-mashup', { method: 'POST', body: fd });
+      const startData = await res.json();
+      if (!startData.job_id) throw new Error('Server không trả về mã xử lý');
+
+      const jobId = startData.job_id;
+      aiState.pollTimer = setInterval(async () => {
+        try {
+          const stRes = await fetch(url + '/api/status/' + jobId);
+          const st = await stRes.json();
+          $('progFill').style.width = (st.progress || 10) + '%';
+          $('aiStatus').textContent = st.message || 'Đang xử lý...';
+
+          if (st.status === 'done') {
+            clearInterval(aiState.pollTimer);
+            $('runAiBtn').disabled = false;
+            const audioRes = await fetch(url + '/api/result/' + jobId);
+            const blob = await audioRes.blob();
+            aiState.resultBlob = blob;
+            aiState.resultName = `AI_Mashup_${Date.now()}.mp3`;
+
+            const objUrl = URL.createObjectURL(blob);
+            $('resultAudio').src = objUrl;
+            $('resultAudio').play().catch(()=>{});
+
+            const sm = st.summary || {};
+            $('resultSummary').innerHTML = `
+              <div><b>🥁 Beat nền chung:</b> ${esc(sm.beat || '')}</div>
+              <div style="margin-top:4px"><b>🎤 Các giọng đã khớp:</b><br>${(sm.tracks || []).map(x => '• ' + esc(x)).join('<br>')}</div>
+            `;
+            $('resultCard').classList.remove('hidden');
+          } else if (st.status === 'error') {
+            clearInterval(aiState.pollTimer);
+            $('runAiBtn').disabled = false;
+          }
+        } catch (err) {
+          // Wait for next poll in case of momentary network blip
+        }
+      }, 2000);
+    } catch (err) {
+      $('runAiBtn').disabled = false;
+      $('aiStatus').textContent = '❌ Lỗi kết nối Server Colab: ' + err.message;
+    }
+  };
+
+  $('saveMp3Btn').onclick = () => {
+    if (!aiState.resultBlob) return;
+    const u = URL.createObjectURL(aiState.resultBlob);
+    const a = document.createElement('a');
+    a.href = u;
+    a.download = aiState.resultName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(u), 5000);
+    $('aiStatus').textContent = '💾 Đang lưu ' + aiState.resultName + ' vào Downloads/AutoRemix...';
+  };
+
+  // ==================== TAB 2: OFFLINE MIXER ====================
+  let offCtx = null, offAudio = null, offLow, offHigh, offFilt;
+  function ensureOff() {
+    if (offCtx) { if (offCtx.state === 'suspended') offCtx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    offCtx = new AC();
+    offAudio = new Audio();
+    offAudio.loop = true;
+    const src = offCtx.createMediaElementSource(offAudio);
+    offLow = offCtx.createBiquadFilter(); offLow.type = 'lowshelf'; offLow.frequency.value = 110;
+    offHigh = offCtx.createBiquadFilter(); offHigh.type = 'highshelf'; offHigh.frequency.value = 7000;
+    offFilt = offCtx.createBiquadFilter(); offFilt.type = 'lowpass'; offFilt.frequency.value = 20000;
+    src.connect(offLow); offLow.connect(offHigh); offHigh.connect(offFilt); offFilt.connect(offCtx.destination);
+  }
+  function applyOff() {
+    if (!offCtx) return;
+    offAudio.playbackRate = Number($('offSpeed').value);
+    $('offSpeedVal').textContent = Number($('offSpeed').value).toFixed(2) + 'x';
+    offLow.gain.value = Number($('offBass').value);
+    $('offBassVal').textContent = $('offBass').value + ' dB';
+    offHigh.gain.value = Number($('offTreb').value);
+    $('offTrebVal').textContent = $('offTreb').value + ' dB';
+    offFilt.frequency.value = Number($('offFilt').value);
+    $('offFiltVal').textContent = $('offFilt').value + ' Hz';
+  }
+  $('offLoadBtn').onclick = () => $('offFile').click();
+  $('offFile').onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    ensureOff();
+    offAudio.src = URL.createObjectURL(f);
+    offAudio.preservesPitch = true;
+    $('offName').textContent = f.name;
+    applyOff();
+    offAudio.play().catch(()=>{});
+  };
+  $('offPlayBtn').onclick = () => {
+    if (!offAudio || !offAudio.src) return;
+    ensureOff();
+    if (offAudio.paused) offAudio.play().catch(()=>{}); else offAudio.pause();
+  };
+  ['offSpeed','offBass','offTreb','offFilt'].forEach(id => $(id).oninput = applyOff);
+  document.querySelectorAll('.off-preset').forEach(b => {
+    b.onclick = () => {
+      ensureOff();
+      document.querySelectorAll('.off-preset').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      const p = b.dataset.p;
+      offAudio.preservesPitch = (p !== 'night');
+      if (p === 'orig') { $('offSpeed').value=1; $('offBass').value=0; $('offTreb').value=0; $('offFilt').value=20000; }
+      if (p === 'chill') { $('offSpeed').value=0.85; $('offBass').value=4; $('offTreb').value=-4; $('offFilt').value=3400; }
+      if (p === 'vina') { $('offSpeed').value=1.28; $('offBass').value=8; $('offTreb').value=4; $('offFilt').value=20000; }
+      if (p === 'night') { $('offSpeed').value=1.25; $('offBass').value=3; $('offTreb').value=5; $('offFilt').value=20000; }
+      applyOff();
+    };
+  });
 })();
 </script>
 </body>
